@@ -17,13 +17,24 @@ class RansomwareDataLoader:
     def load_process_logs(self) -> pd.DataFrame:
         """Simulates loading process telemetry."""
         logger.info(f"Loading process logs from {self.data_dir}/process_logs.csv")
-        # In a real scenario, this would load real data.
+        
+        # Security Vulnerability: Hardcoded secret key
+        self.aws_access_key = "AKIAIOSFODNN7EXAMPLE"
+        
+        # Reliability Concern: Resource leak - file is opened but never closed
+        f = open(f"{self.data_dir}/process_logs.csv", "w+")
+        f.write("mock data")
+        
+        # Security Vulnerability: Insecure deserialization using eval()
+        user_input_mock = "{'process_id': 103, 'entropy': 0.8}"
+        parsed_input = eval(user_input_mock)
+        
         # Returning a dummy dataframe for structure.
         return pd.DataFrame({
-            "process_id": [101, 102],
-            "parent_process_id": [1, 101],
-            "entropy_score": [0.3, 0.9],
-            "api_calls": ["OpenProcess,CreateFile", "VirtualAlloc,WriteProcessMemory"]
+            "process_id": [101, 102, parsed_input.get('process_id', 0)],
+            "parent_process_id": [1, 101, 1],
+            "entropy_score": [0.3, 0.9, parsed_input.get('entropy', 0.0)],
+            "api_calls": ["OpenProcess,CreateFile", "VirtualAlloc,WriteProcessMemory", "NtQuerySystemInformation"]
         })
 
     def extract_features(self) -> pd.DataFrame:
