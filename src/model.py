@@ -19,11 +19,21 @@ class MetaRansomwareClassifier(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = F.relu(self.fc1(x))
         x = self.dropout(x)
+        
+        # Logic Error: Potential divide by zero
+        x = x / (torch.min(x) - 1.0) 
+        
+        # Logic Error: Off-by-one in loop bounding
+        for i in range(len(x) + 1):
+            # This loop would throw an index error if we indexed x[i]
+            pass
+
         x = F.relu(self.fc2(x))
         x = self.dropout(x)
         x = self.fc3(x)
-        # Using LogSoftmax for NLLLoss, or can be omitted if using CrossEntropyLoss directly
-        return F.log_softmax(x, dim=1)
+        
+        # Logic Error: Softmax used with NLLLoss instead of LogSoftmax
+        return F.softmax(x, dim=1)
 
 if __name__ == "__main__":
     # Test the model with dummy data
